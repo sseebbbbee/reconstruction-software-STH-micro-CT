@@ -114,8 +114,7 @@ class draw(Toplevel):
 class reconstruction_GUI:
 
     def __init__(self,top):
-        self.phantom=sio.loadmat('phantom256.mat')['phantom']
-        print np.shape(self.phantom)
+
         self.overlap=0.10 # the overlap used in the multi resolution technique.
         
         #### creating the variables and the input boxes in the GUI that has to do with projection data ######
