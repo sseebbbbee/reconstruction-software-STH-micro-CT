@@ -33,7 +33,7 @@ def get_mean_lf_and_dc(pixels,beam_profile_files,dark_current_files,lag_corr):
         X=B-dc 
            
         a=(3.66,0.35,0.028) # these values should be read from a text file
-        b=(0.99,0.0017,0) # these values should be read from a text file
+        b=(0.94,0.00075,0.000012) # these values should be read from a text file
         #     a=(3.66,0.35,0.028) The one lorenzo says
         #     b=(0.99,0.0017,0.0012)The one lorenzo says
         #     a=(3.48,0.41,0.03)
@@ -175,8 +175,8 @@ def making_sino_from_bin(filenames,lag_corr,number_of_files, number_of_projectio
     D[:,0,:]=-1*np.log(E/Beam_profile_low) ## getting attenuation coeffs
 
     if lag_corr==True:
-        a=(3.66,0.35,0.028)
-        b=(0.99,0.0017,0.00) #b3 is 0.0012 in Lorenzos report, these values should be read from a text file.
+        a=(3.66,0.35,0.028) # these values should be read from a text file
+        b=(0.94,0.00075,0.000012) # these values should be read from a text file
         S1=X+S1*np.exp(-a[0])
         S2=X+S2*np.exp(-a[1])
         S3=X+S3*np.exp(-a[2])
