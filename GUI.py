@@ -626,16 +626,25 @@ class reconstruction_GUI:
             dark_current_file=self.dirname_dc.get()+'/*.bin' # the place of beam profile files
             
             ###The geometry of the CT-system
+            with open('allignment parameters.txt') as f:
+                lines = f.readlines()
+            param=np.zeros(5)
+            ii=0
+            for line in lines:
+                inde=line.index('=')
+                param[ii]=line[inde+1:len(line)]
+                ii=ii+1
+                
             pixels=2400
-            source_to_origin_mm=169.2
+            source_to_origin_mm=param[0]
             source_to_origin_pixels=np.round(source_to_origin_mm/0.05);
-            origin_to_detector_mm=381.6-source_to_origin_mm
+            origin_to_detector_mm=param[1]-source_to_origin_mm
             origin_to_detector_pixels=np.round(origin_to_detector_mm/0.05);
             # changes the distances to fit the new sampling of the detector
             self.origin_det=np.round(origin_to_detector_pixels/np.round(pixels/self.new_size[1]))
             self.source_origin=np.round(source_to_origin_pixels/np.round(pixels/self.new_size[1]))
                         
-            alignment_in_mm=(1.674,-0.566,0) #dx, dz translation, third input is rotation, this part should be read from a txt file instead.
+            alignment_in_mm=param[2:4] #dx, dz translation, third input is rotation, this part should be read from a txt file instead.
             ###
             
             filenames.sort() # sorts the filenames so the come in the order they are obtained

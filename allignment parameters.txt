@@ -1,0 +1,5 @@
+source to origin [mm]=169.2
+source to detector [mm]=381.6
+dx [mm]=1.674
+dy [mm]=-0.566
+rotation=0

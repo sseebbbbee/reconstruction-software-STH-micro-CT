@@ -282,7 +282,7 @@ def make_reconsruction(proj_data,number_of_projections,vol_size_ratio,det_size,r
         for ii in range(0,nr_iterations):
             angles_ind = np.linspace(0, number_of_projections, number_of_projections,False)
             np.random.shuffle(angles_ind)
-            print angles_ind
+
             for jj in angles_ind:
                 proj_geom = astra.create_proj_geom('cone', det_spacing, det_spacing, det_size[1], det_size[1], angles[jj], source_to_origin_pixels,origin_to_detector_pixels)
             #print np.min(sub_volume_high)
