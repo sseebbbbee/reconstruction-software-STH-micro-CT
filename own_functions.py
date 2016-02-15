@@ -6,7 +6,10 @@ import pylab
 #from skimage.transform import resize,rotate #Better, keeps real values if we want to rotate.
 from scipy import misc
 
-def get_mean_lf_and_dc(pixels,beam_profile_files,dark_current_files,lag_corr):
+def find_char(s, ch):
+    return [i for i, ltr in enumerate(s) if ltr == ch]
+
+def get_mean_lf_and_dc(pixels,beam_profile_files,dark_current_files,lag_corr,a,b):
     # reads the bin files and creates a mean dark current and beam profile signal. corrections of defective elements are also done. 
     
     dc_len= len(dark_current_files)
@@ -32,12 +35,7 @@ def get_mean_lf_and_dc(pixels,beam_profile_files,dark_current_files,lag_corr):
         B=B[256:pixels*pixels+256]
         X=B-dc 
            
-        a=(3.66,0.35,0.028) # these values should be read from a text file
-        b=(0.94,0.00075,0.000012) # these values should be read from a text file
-        #     a=(3.66,0.35,0.028) The one lorenzo says
-        #     b=(0.99,0.0017,0.0012)The one lorenzo says
-        #     a=(3.48,0.41,0.03)
-        #     b=(0.94,0.0015,0.0011)
+
         S1=X+S1*np.exp(-a[0])
         S2=X+S2*np.exp(-a[1])
         S3=X+S3*np.exp(-a[2])
@@ -112,7 +110,7 @@ def correction_of_misalignment(Projection,pixels,pixels_to_crop,alignment_in_mm)
     return Projection
 
 
-def making_sino_from_bin(filenames,lag_corr,number_of_files, number_of_projections,ang_space, pixels,beam_profile_file,dark_current_file,new_size,det_low,pixels_to_crop,alignment_in_mm):
+def making_sino_from_bin(filenames,lag_corr,number_of_files, number_of_projections,ang_space, pixels,beam_profile_file,dark_current_file,new_size,det_low,pixels_to_crop,alignment_in_mm,a,b):
     A=np.zeros((new_size[0],number_of_projections,new_size[1]),dtype= np.float16) # matrix with the highest resolution projection values
     D=np.zeros((det_low,number_of_projections,det_low),dtype= np.float16) # matrix with low resolution projection values
 
@@ -125,7 +123,7 @@ def making_sino_from_bin(filenames,lag_corr,number_of_files, number_of_projectio
         Beam_profile=np.fromfile(beam_profile_file,dtype='int16')
         Dark_current=np.fromfile(dark_current_file,dtype='int16')
     else:
-        Beam_profile,Dark_current=get_mean_lf_and_dc(pixels,beam_profile_files,dark_current_files,lag_corr)
+        Beam_profile,Dark_current=get_mean_lf_and_dc(pixels,beam_profile_files,dark_current_files,lag_corr,a,b)
 
     Beam_profile=np.reshape(Beam_profile,(pixels,pixels))
     Beam_profile=correction_of_misalignment(Beam_profile,pixels,pixels_to_crop,alignment_in_mm)
@@ -175,8 +173,6 @@ def making_sino_from_bin(filenames,lag_corr,number_of_files, number_of_projectio
     D[:,0,:]=-1*np.log(E/Beam_profile_low) ## getting attenuation coeffs
 
     if lag_corr==True:
-        a=(3.66,0.35,0.028) # these values should be read from a text file
-        b=(0.94,0.00075,0.000012) # these values should be read from a text file
         S1=X+S1*np.exp(-a[0])
         S2=X+S2*np.exp(-a[1])
         S3=X+S3*np.exp(-a[2])

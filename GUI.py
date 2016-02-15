@@ -165,7 +165,7 @@ class reconstruction_GUI:
         #### creating the variables and the input boxes in the GUI that has to do with the low resolution reconstruction######
         
         self.algo = StringVar()
-        self.algobox = ttk.Combobox(top, values=('FDK', 'SIRT', 'CGLS','FDK_SIRT','FDK_CGLS'),state='readonly')
+        self.algobox = ttk.Combobox(top, values=('FDK', 'SIRT', 'SART', 'CGLS','FDK_SIRT','FDK_CGLS'),state='readonly')
         self.algobox.bind("<<ComboboxSelected>>", self.set_comboparam)
         self.algobox.grid(row=5,column=1,columnspan=3,sticky=W)
         self.algo_label = Label(top, text="Algorithm:")
@@ -632,7 +632,11 @@ class reconstruction_GUI:
             ii=0
             for line in lines:
                 inde=line.index('=')
-                param[ii]=line[inde+1:len(line)]
+                x=line[inde+1:len(line)-1]
+                if x[0]=='-':
+                    param[ii]=-1*float(x[1:len(x)])
+                else:
+                    param[ii]=float(x[1:len(x)])
                 ii=ii+1
                 
             pixels=2400
@@ -654,10 +658,29 @@ class reconstruction_GUI:
             print self.number_of_projections, "number of projections "
             pixels_to_crop=150 # the number of pixels to crop on every side of the projection.
             
+            with open('Lag correction parameters.txt') as corr:
+                lines = corr.readlines()
+    
+            kV=45
 
-            print self.lag_corr.get()
+            a=np.zeros(3)
+            b=np.zeros(3)
+            for line in lines:
+                if line==lines[0]:
+                    pass
+                else:
+                    if int(line[0:2])==kV:
+                        indexes= find_char(line,',')
+                        a[0]=float(line[indexes[0]+1:indexes[1]])
+                        a[1]=float(line[indexes[1]+1:indexes[2]])
+                        a[2]=float(line[indexes[2]+1:indexes[3]])
+                        b[0]=float(line[indexes[3]+1:indexes[4]])
+                        b[1]=float(line[indexes[4]+1:indexes[5]])
+                        b[2]=float(line[indexes[5]+1:len(line)])
+
+            print a, b
             #reads the bin files and makes the transformation attenuation values
-            self.proj_data,self.proj_data_low= making_sino_from_bin(filenames,self.lag_corr.get(),number_of_files, self.number_of_projections,self.ang_space, pixels,beam_profile_file,dark_current_file,self.new_size,self.det_low,pixels_to_crop,alignment_in_mm)
+            self.proj_data,self.proj_data_low= making_sino_from_bin(filenames,self.lag_corr.get(),number_of_files, self.number_of_projections,self.ang_space, pixels,beam_profile_file,dark_current_file,self.new_size,self.det_low,pixels_to_crop,alignment_in_mm,a,b)
             
 
             # calculates the FOV so only this part is needed for the reconstruction

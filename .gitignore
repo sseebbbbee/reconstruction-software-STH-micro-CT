@@ -45,3 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+validate_multi.py
+*.nii
+*.mat
+own_functions.pyc
