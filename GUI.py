@@ -636,9 +636,9 @@ class reconstruction_GUI:
                 if x[0]=='-':
                     param[ii]=-1*float(x[1:len(x)])
                 else:
-                    param[ii]=float(x[1:len(x)])
+                    param[ii]=float(x[0:len(x)])
                 ii=ii+1
-                
+            print param    
             pixels=2400
             source_to_origin_mm=param[0]
             source_to_origin_pixels=np.round(source_to_origin_mm/0.05);

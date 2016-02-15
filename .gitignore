@@ -49,3 +49,4 @@ validate_multi.py
 *.nii
 *.mat
 own_functions.pyc
+*.pyc
