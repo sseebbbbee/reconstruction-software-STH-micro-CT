@@ -50,3 +50,5 @@ validate_multi.py
 *.mat
 own_functions.pyc
 *.pyc
+*.pyc
+validate_multi2.py
