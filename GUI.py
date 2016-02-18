@@ -163,10 +163,10 @@ class reconstruction_GUI:
         #####################
         
         #### creating the variables and the input boxes in the GUI that has to do with the low resolution reconstruction######
-        
+        self.algo_low_old=StringVar() # used to check if box for relaxation should be closed.
         self.algo = StringVar()
         self.algobox = ttk.Combobox(top, values=('FDK', 'SIRT', 'SART', 'CGLS','FDK_SIRT','FDK_CGLS'),state='readonly')
-        self.algobox.bind("<<ComboboxSelected>>", self.set_comboparam)
+        self.algobox.bind("<<ComboboxSelected>>", lambda event: self.show_relax(event,'low_res'))
         self.algobox.grid(row=5,column=1,columnspan=3,sticky=W)
         self.algo_label = Label(top, text="Algorithm:")
         self.algo_label.grid(row=5,column=0)
@@ -220,9 +220,10 @@ class reconstruction_GUI:
         self.label_radio_parts_status=Label(top,textvariable=self.radio_parts_status)
         self.label_radio_parts_status.grid(row=11,column=2,columnspan=4,sticky=W)
         
+        self.algo_high_old=StringVar() # used to check if box for relaxation should be closed.
         self.algo_high = StringVar()
         self.algobox_high = ttk.Combobox(top, values=('SIRT', 'SART', 'CGLS'),state='readonly')
-        self.algobox_high.bind("<<ComboboxSelected>>", self.set_comboparam)
+        self.algobox_high.bind("<<ComboboxSelected>>", lambda event: self.show_relax(event,'high_res'))
         self.algobox_high.grid(row=21,column=1,columnspan=3,sticky=W)
         self.algo_high_label = Label(top, text="Algorithm:")
         self.algo_high_label.grid(row=21,column=0)
@@ -360,8 +361,11 @@ class reconstruction_GUI:
                             proj_data_part=self.proj_data[pro_start:pro_stop,:,:]
                             proj_data_low_part=proj_data_low[pro_start:pro_stop,:,:]
                             #########
+                            try:
+                                relaxation=float(self.relax_high_entry.get()) # the relaxation parameter for the self-made SART aalgorithm,
+                            except:
+                                relaxation=0.5
                             
-                            relaxation=0.05 # relaxation for the self-made SART aalgorithm, this value  needs to be changed though.
                             rec_sub_vol =recon_multi_part(algon_high,proj_data_part,proj_data_low_part,self.det_move,self.angles,self.x_sub_boundaries,self.y_sub_boundaries,self.z_sub_boundaries,self.vol_size,self.det_spacing_x,self.det_spacing_y,self.x_subvol_width,self.y_subvol_width,self.z_subvol_width,n_x,n_y,n_z,nr_iterations_high,self.source_origin, self.origin_det,relaxation)
                             sub_shape=np.shape(rec_sub_vol)
                             rec_sub_roi= rec_sub_vol[(self.x_sub_boundaries[n_x,0]-self.x_sub_boundaries[n_x,1]):sub_shape[0]-(self.x_sub_boundaries[n_x+1,2]-self.x_sub_boundaries[n_x+1,0]),(self.y_sub_boundaries[n_y,0]-self.y_sub_boundaries[n_y,1]):sub_shape[1]-(self.y_sub_boundaries[n_y+1,2]-self.y_sub_boundaries[n_y+1,0]),(self.z_sub_boundaries[n_z,0]-self.z_sub_boundaries[n_z,1]):sub_shape[2]-(self.z_sub_boundaries[n_z+1,2]-self.z_sub_boundaries[n_z+1,0])]
@@ -545,7 +549,12 @@ class reconstruction_GUI:
             self.det_spacing_y_low=np.round(float(self.det_spacing_y)/self.vol_size_ratio,decimals=2)
 
             algon=self.algobox.get()
-            relaxation=0.05 # the relaxation parameter, should maybe be a input box instead
+            try:
+                relaxation=float(self.relax_low_entry.get()) # the relaxation parameter
+            except:
+                relaxation=0.5
+                    
+            print relaxation
             initializer=0 # start reconstruction with a volume of zeros
             rec_volume=(self.vol_size_low,self.vol_size_low,self.vol_size_low)
             self.det_size=(self.det,self.det_low)
@@ -563,10 +572,10 @@ class reconstruction_GUI:
                 self.rec_low=make_reconsruction(self.proj_data_low,self.number_of_projections,self.vol_size_ratio,self.det_size,rec_volume,self.source_origin,self.origin_det,nr_iterations_low,algo,relaxation,initializer)
             elif algon=='SART': # can use the whole projection data
                 algo='EGEN_SART'
-                rec_low=make_reconsruction(self.proj_data,self.number_of_projections,self.vol_size_ratio,self.det_size,rec_volume,self.source_origin,self.origin_det,nr_iterations_low,algo,relaxation,initializer)
+                self.rec_low=make_reconsruction(self.proj_data,self.number_of_projections,self.vol_size_ratio,self.det_size,rec_volume,self.source_origin,self.origin_det,nr_iterations_low,algo,relaxation,initializer)
             elif algon=='Landweber': # can use the whole projection data
                 algo='EGEN_SIRT'
-                rec_low=make_reconsruction(self.proj_data_low,self.number_of_projections,self.vol_size_ratio,self.det_size,rec_volume,self.source_origin,self.origin_det,nr_iterations_low,algo,relaxation,initializer)
+                self.rec_low=make_reconsruction(self.proj_data_low,self.number_of_projections,self.vol_size_ratio,self.det_size,rec_volume,self.source_origin,self.origin_det,nr_iterations_low,algo,relaxation,initializer)
             elif algon=='FDK_SIRT':
                 algo='FDK_CUDA'
                 self.rec_low=make_reconsruction(self.proj_data_low,self.number_of_projections,self.vol_size_ratio,self.det_size,rec_volume,self.source_origin,self.origin_det,nr_iterations_low,algo,relaxation,initializer)
@@ -583,15 +592,15 @@ class reconstruction_GUI:
                 print'Algorithm not found, following algorithms exists: FDK,SIRT,CGLS,FDK_SIRT and FDK_CGLS'
                 quit()
 
-            proj_data_low=[]
+            proj_data_low=0
             ###Get the projection image with parallel rays so it can be used to for drawing region of interest
             vol_geom = astra.create_vol_geom(rec_volume)
             det_spacing=np.round((float(self.det_size[0])/self.det_size[1])/self.vol_size_ratio,decimals=3)
             proj_geom = astra.create_proj_geom('parallel3d', 1, 1, self.vol_size_low, self.vol_size_low, self.angles)
             sinogram_id, proj_parallel = astra.create_sino3d_gpu(self.rec_low, proj_geom,vol_geom)
             self.par_proj_im=proj_parallel[:,0,:] # only one angle is needed for the draw.
-            vol_geom=[]
-            proj_parallel=[]
+            vol_geom=0
+            proj_parallel=0
             astra.data3d.delete(sinogram_id)
             ####
             
@@ -705,9 +714,31 @@ class reconstruction_GUI:
             self.dirname_dc.set(tkFileDialog.askdirectory())
         
                 
-    def set_comboparam(self,event):
-        self.algo.set(self.algobox.get())
-
+    def show_relax(self,event,high_or_low):
+        #self.algo.set(self.algobox.get())
+        if high_or_low=='low_res':
+            algo_low_now=self.algobox.get()
+            if self.algo_low_old=='SART':
+                self.relax_low_label.destroy()
+                self.relax_low_entry.destroy()
+            if algo_low_now=='SART':
+                self.relax_low_label = Label(top, text="Relaxation:")
+                self.relax_low_label.grid(row=5,column=3,columnspan=2,sticky=E)
+                self.relax_low_entry = Entry(top, width=5)
+                self.relax_low_entry.grid(row=5,column=5,sticky=W)
+                self.algo_low_old=algo_low_now
+        
+        if high_or_low=='high_res':
+            algo_high_now=self.algobox_high.get()
+            if self.algo_high_old=='SART':
+                self.relax_high_label.destroy()
+                self.relax_high_entry.destroy()
+            if algo_high_now=='SART':
+                self.relax_high_label = Label(top, text="Relaxation:")
+                self.relax_high_label.grid(row=21,column=3,columnspan=2,sticky=E)
+                self.relax_high_entry = Entry(top, width=5)
+                self.relax_high_entry.grid(row=21,column=5,sticky=W)
+                self.algo_high_old=algo_high_now            
         
     def show(self):
 
@@ -735,7 +766,7 @@ class reconstruction_GUI:
 #creating a Tkinter object        
 top = Tk() 
 top.title('Reconstruction')
-top.geometry('1000x700')
+top.geometry('1000x600')
 
 a=reconstruction_GUI(top)
 
