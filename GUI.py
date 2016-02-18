@@ -366,7 +366,7 @@ class reconstruction_GUI:
                             sub_shape=np.shape(rec_sub_vol)
                             rec_sub_roi= rec_sub_vol[(self.x_sub_boundaries[n_x,0]-self.x_sub_boundaries[n_x,1]):sub_shape[0]-(self.x_sub_boundaries[n_x+1,2]-self.x_sub_boundaries[n_x+1,0]),(self.y_sub_boundaries[n_y,0]-self.y_sub_boundaries[n_y,1]):sub_shape[1]-(self.y_sub_boundaries[n_y+1,2]-self.y_sub_boundaries[n_y+1,0]),(self.z_sub_boundaries[n_z,0]-self.z_sub_boundaries[n_z,1]):sub_shape[2]-(self.z_sub_boundaries[n_z+1,2]-self.z_sub_boundaries[n_z+1,0])]
                             #rec_sub_roi= rec_sub_vol[(self.x_sub_boundaries[n_x,0]-self.x_sub_boundaries[n_x,1]):(self.x_sub_boundaries[n_x,0]-self.x_sub_boundaries[n_x,1]+self.x_subvol_width),(self.y_sub_boundaries[n_y,0]-self.y_sub_boundaries[n_y,1]):(self.y_sub_boundaries[n_y,0]-self.y_sub_boundaries[n_y,1]+self.y_subvol_width),(self.z_sub_boundaries[n_z,0]-self.z_sub_boundaries[n_z,1]):(self.z_sub_boundaries[n_z,0]-self.z_sub_boundaries[n_z,1]+self.z_subvol_width)]
-                            print np.shape(rec_sub_roi)
+                            
                             print ii
                             ii=ii+1
 

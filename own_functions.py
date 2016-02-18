@@ -506,7 +506,7 @@ def read_and_show(x_parts,y_parts,z_parts,x_sub_boundaries,y_sub_boundaries,z_su
                 #full_rec[x_sub_boundaries[n_x,0]:x_sub_boundaries[n_x+1,0],y_sub_boundaries[n_y,0]:y_sub_boundaries[n_y+1,0],z_sub_boundaries[n_z,0]:z_sub_boundaries[n_z+1,0]]=rec_ROI[:,:,:,ii]
                 outfile='C:/Users/Sebastian/Documents/CTdata/Saved Data/rec_ROI_'+str(ii)+'det_'+str(det)+'.mat'
                 P = sio.loadmat(outfile)['rec_sub_roi']
-                print np.shape(P)
+                
                 if (nr_x_parts*nr_y_parts*nr_z_parts)==1:
                     full_rec=P
                 else:
