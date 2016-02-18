@@ -221,7 +221,7 @@ class reconstruction_GUI:
         self.label_radio_parts_status.grid(row=11,column=2,columnspan=4,sticky=W)
         
         self.algo_high = StringVar()
-        self.algobox_high = ttk.Combobox(top, values=('SIRT', 'CGLS'),state='readonly')
+        self.algobox_high = ttk.Combobox(top, values=('SIRT', 'SART', 'CGLS'),state='readonly')
         self.algobox_high.bind("<<ComboboxSelected>>", self.set_comboparam)
         self.algobox_high.grid(row=21,column=1,columnspan=3,sticky=W)
         self.algo_high_label = Label(top, text="Algorithm:")
@@ -319,6 +319,10 @@ class reconstruction_GUI:
                 #creating the CT geometry
                 proj_geom_low = astra.create_proj_geom('cone',  self.det_spacing_x_low, self.det_spacing_y_low, self.det_row_count, self.det_col_count, self.angles, self.source_origin, self.origin_det)
                 algon_high=self.algobox_high.get()
+
+                if str(algon_high)=='SART':
+                    algon_high='EGEN_SART'
+
                 for n_x in x_parts:
                     for n_y in y_parts:
                         for n_z in z_parts: ## nr_subvol_z

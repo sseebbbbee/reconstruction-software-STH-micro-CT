@@ -583,37 +583,40 @@ def recon_multi_part(algon,proj_data,proj_data_low,det_move,angles,x_sub_boundar
 
         rec_volume=(width_x.astype(int), width_y.astype(int), width_z.astype(int))
         rec_volume=np.zeros(rec_volume,dtype= np.float16)
+        
+        sides=[rec_volume.shape[0],rec_volume.shape[1],rec_volume.shape[2]]
+        max_side=np.max(sides)
+        print max_side
+        h=relaxation*float(1)/(max_side)#0.00001 change to max size of y o z
 
 
-        vectors=np.matrix('0 0 0 0 0 0 0 0 0 0 0 0')
+        vectors=np.matrix('0 0 0 0 0 0 0 0 0 0 0 0',dtype= np.float16)
         for ii in range(0,nr_iterations_high):
             angles_ind = np.linspace(0, len(angles), len(angles),False)
             np.random.shuffle(angles_ind) #shuffle the projection angles to get faster convergence
             
             for jj in angles_ind:
+                
                 #proj_geom = astra.create_proj_geom('cone', det_spacing, det_spacing, det_size[1], det_size[1], angles[jj], source_to_origin_pixels,origin_to_detector_pixels)
                 vectors[:,:]=vectors_ROI[jj,:]
+                proj_geom_SART = astra.create_proj_geom('cone_vec', det_row_count, det_col_count, vectors)
+                sinogram_id, proj_it = astra.create_sino3d_gpu(rec_volume, proj_geom_SART,vol_geom_ROI)
 
-                proj_geom_ROI = astra.create_proj_geom('cone_vec', det_row_count, det_col_count, vectors)
-            
-                sinogram_id, proj_it = astra.create_sino3d_gpu(rec_volume, proj_geom_ROI,vol_geom_ROI)
                 proj_it=proj_it[:,0,:]
+
+
                 residual=np.zeros((det_row_count,1,det_col_count))
-                residual[:,0,:]=proj_it-proj_data[:,jj,:]
-                #print np.shape(proj_it),np.shape(residual),np.shape(proj_data[:,jj,:])
-                #astra.data3d.store(sinogram_id, residual)
-                
-                h=relaxation*float(1)/(rec_volume.shape[2])#0.00001 change to max size of y o z
+                residual[:,0,:]=proj_it-pro_proj[:,jj,:]
+
+                astra.data3d.store(sinogram_id, residual)
+
                 #h=0.001
-                [id, rec_volume_it] = astra.create_backprojection3d_gpu(residual, proj_geom_ROI, vol_geom_ROI)
+                [id, rec_volume_it] = astra.create_backprojection3d_gpu(residual, proj_geom_SART, vol_geom_ROI)
                 rec_volume= rec_volume -h*rec_volume_it
                 rec_volume=rec_volume*(rec_volume>0)
                 astra.data3d.delete(id)
-                astra.data3d.delete(sinogram_id)    
-#             pylab.figure()
-#             pylab.gray()
-#             pylab.imshow(rec_volume[:,:,128])
-            #pylab.show()
+                astra.data3d.delete(sinogram_id)  
+                
             
 
     else:
