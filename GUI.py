@@ -761,7 +761,40 @@ class reconstruction_GUI:
         self.start_x=app.rec_start_x
         self.last_x=app.rec_last_x
         
-        print app.rec_start_x,app.rec_last_x,app.rec_start_y, app.rec_last_y,app.rec_start_z, app.rec_last_z
+        try: 
+            self.draw_x_label = Label(top, text="x-coordinates:")
+            self.draw_x_label.grid(row=8,column=1,columnspan=3,sticky=W)
+            
+            self.draw_x_start_label = Label(top, text=str(self.start_x))
+            self.draw_x_start_label.grid(row=8,column=2,sticky=E)
+            self.draw_x_line_label = Label(top, text='-')
+            self.draw_x_line_label.grid(row=8,column=3)
+            self.draw_x_last_label = Label(top, text=str(self.last_x))
+            self.draw_x_last_label.grid(row=8,column=4,sticky=W)
+        
+            self.draw_y_label = Label(top, text="y-coordinates:")
+            self.draw_y_label.grid(row=9,column=1,columnspan=3,sticky=W)
+            
+            self.draw_y_start_label = Label(top, text=str(self.start_y))
+            self.draw_y_start_label.grid(row=9,column=2,sticky=E)
+            self.draw_y_line_label = Label(top, text='-')
+            self.draw_y_line_label.grid(row=9,column=3)
+            self.draw_y_last_label = Label(top, text=str(self.last_y))
+            self.draw_y_last_label.grid(row=9,column=4,sticky=W)
+        
+            self.draw_z_label = Label(top, text="z-coordinates:")
+            self.draw_z_label.grid(row=10,column=1,columnspan=3,sticky=W)
+            
+            self.draw_z_start_label = Label(top, text=str(self.start_z))
+            self.draw_z_start_label.grid(row=10,column=2,sticky=E)
+            self.draw_z_line_label = Label(top, text='-')
+            self.draw_z_line_label.grid(row=10,column=3)
+            self.draw_z_last_label = Label(top, text=str(self.last_z))
+            self.draw_z_last_label.grid(row=10,column=4,sticky=W)            
+
+        except:
+            
+            print app.rec_start_x,app.rec_last_x,app.rec_start_y, app.rec_last_y,app.rec_start_z, app.rec_last_z
         
 #creating a Tkinter object        
 top = Tk() 
