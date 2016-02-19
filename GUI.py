@@ -188,7 +188,7 @@ class reconstruction_GUI:
         ####################
         
         #### creating the variables and the input boxes in the GUI that has to do with projection data ######
-        
+        self.drawn=StringVar() # used to chect if drawn or not
         self.button_choose_ROI=Button(top, text='Choose ROI',command=self.show)
         self.button_choose_ROI.grid(row=8,column=0)
         
@@ -754,14 +754,34 @@ class reconstruction_GUI:
         app.mainloop()
         
         # getting the boundaries for the region of interest
-        self.start_z=app.rec_start_z
-        self.last_z=app.rec_last_z
-        self.start_y=app.rec_start_y
-        self.last_y=app.rec_last_y
-        self.start_x=app.rec_start_x
-        self.last_x=app.rec_last_x
+
         
         try: 
+            self.start_z=app.rec_start_z
+            self.last_z=app.rec_last_z
+            self.start_y=app.rec_start_y
+            self.last_y=app.rec_last_y
+            self.start_x=app.rec_start_x
+            self.last_x=app.rec_last_x
+            
+            if self.drawn == 'drawn':
+                self.draw_x_label.destroy()
+                self.draw_x_start_label.destroy()
+                self.draw_x_line_label.destroy()
+                self.draw_x_last_label.destroy()
+
+                self.draw_y_label.destroy()
+                self.draw_y_start_label.destroy()
+                self.draw_y_line_label.destroy()
+                self.draw_y_last_label.destroy()                
+
+                self.draw_z_label.destroy()
+                self.draw_z_start_label.destroy()
+                self.draw_z_line_label.destroy()
+                self.draw_z_last_label.destroy()
+            if self.drawn == 'error':
+                self.draw_error_label.destroy()
+                                
             self.draw_x_label = Label(top, text="x-coordinates:")
             self.draw_x_label.grid(row=8,column=1,columnspan=3,sticky=W)
             
@@ -791,11 +811,28 @@ class reconstruction_GUI:
             self.draw_z_line_label.grid(row=10,column=3)
             self.draw_z_last_label = Label(top, text=str(self.last_z))
             self.draw_z_last_label.grid(row=10,column=4,sticky=W)            
-
-        except:
             
-            print app.rec_start_x,app.rec_last_x,app.rec_start_y, app.rec_last_y,app.rec_start_z, app.rec_last_z
-        
+            self.drawn = 'drawn'
+        except:
+            if self.drawn == 'drawn':
+                self.draw_x_label.destroy()
+                self.draw_x_start_label.destroy()
+                self.draw_x_line_label.destroy()
+                self.draw_x_last_label.destroy()
+
+                self.draw_y_label.destroy()
+                self.draw_y_start_label.destroy()
+                self.draw_y_line_label.destroy()
+                self.draw_y_last_label.destroy()                
+
+                self.draw_z_label.destroy()
+                self.draw_z_start_label.destroy()
+                self.draw_z_line_label.destroy()
+                self.draw_z_last_label.destroy()
+            self.draw_error_label = Label(top, text="Error occured, draw again")
+            self.draw_error_label.grid(row=8,column=1,columnspan=3,sticky=W)
+            self.drawn='error'
+            #self.drawn = True
 #creating a Tkinter object        
 top = Tk() 
 top.title('Reconstruction')
