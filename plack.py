@@ -30,7 +30,7 @@ new_size=(int(det),int(det))
 
 #plack='QRM_10_12_curr800_vol30_pulse1500'#raw_input("folder: ")
 plack='plaque36kV800mA1500ms'
-KTH=False
+KTH=True
 if KTH==True:
     filenames=glob.glob('CTdata/'+plack+'/*.bin') # makes filenames a list
     beam_profile_file='CTdata/lf36kV800mA1500ms/*.bin'
