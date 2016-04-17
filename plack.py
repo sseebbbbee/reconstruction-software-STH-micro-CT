@@ -30,7 +30,7 @@ new_size=(int(det),int(det))
 
 #plack='QRM_10_12_curr800_vol30_pulse1500'#raw_input("folder: ")
 plack='plaque36kV800mA1500ms'
-KTH=True
+KTH=False
 if KTH==True:
     filenames=glob.glob('CTdata/'+plack+'/*.bin') # makes filenames a list
     beam_profile_file='CTdata/lf36kV800mA1500ms/*.bin'
@@ -45,25 +45,69 @@ else:
     dark_current_file="C:/Users/Sebastian/Documents/CTdata/dc36kV/*.bin"
     outfile='C:/Users/Sebastian/Documents/CTdata/Saved Data/proj_data_det_'+plack+'_det'+str(det)+'ang'+str(ang_space)
     outfile_low='C:/Users/Sebastian/Documents/CTdata/Saved Data/proj_data_det_'+plack+'_det'+str(det_low)+'ang'+str(ang_space)
+
+
+###The geometry of the CT-system
+with open('allignment parameters.txt') as f:
+    lines = f.readlines()
+param=np.zeros(5)
+ii=0
+for line in lines:
+    inde=line.index('=')
+    x=line[inde+1:len(line)-1]
+    if x[0]=='-':
+        param[ii]=-1*float(x[1:len(x)])
+    else:
+        param[ii]=float(x[0:len(x)])
+    ii=ii+1
+print param    
 pixels=2400
-source_to_origin_mm=169.2
+source_to_origin_mm=param[0]
 source_to_origin_pixels=np.round(source_to_origin_mm/0.05);
-origin_to_detector_mm=381.6-source_to_origin_mm
+origin_to_detector_mm=param[1]-source_to_origin_mm
 origin_to_detector_pixels=np.round(origin_to_detector_mm/0.05);
-
-
-filenames.sort()
+# changes the distances to fit the new sampling of the detector
+origin_det=np.round(origin_to_detector_pixels/np.round(pixels/new_size[1]))
+source_origin=np.round(source_to_origin_pixels/np.round(pixels/new_size[1]))
+                        
+alignment_in_mm=param[2:4] #dx, dz translation, third input is rotation, this part should be read from a txt file instead.
+###
+            
+filenames.sort() # sorts the filenames so the come in the order they are obtained
 number_of_files= len(filenames)
 print number_of_files
 number_of_projections=number_of_files/ang_space
 print number_of_projections, "number of projections "
-pixels_to_crop=150
-alignment_in_mm=(1.674,-0.566,0) #dx, dz translation, third input is rotation
+pixels_to_crop=150 # the number of pixels to crop on every side of the projection.
+            
+with open('Lag correction parameters.txt') as corr:
+    lines = corr.readlines()
+    
+kV=45
+
+a=np.zeros(3)
+b=np.zeros(3)
+for line in lines:
+    if line==lines[0]:
+        pass
+    else:
+        if int(line[0:2])==kV:
+            indexes= find_char(line,',')
+            a[0]=float(line[indexes[0]+1:indexes[1]])
+            a[1]=float(line[indexes[1]+1:indexes[2]])
+            a[2]=float(line[indexes[2]+1:indexes[3]])
+            b[0]=float(line[indexes[3]+1:indexes[4]])
+            b[1]=float(line[indexes[4]+1:indexes[5]])
+            b[2]=float(line[indexes[5]+1:len(line)])
+
+            print a, b
+
+
 try:
     proj_data = sio.loadmat(outfile+'.mat')['proj_data']
     proj_data_low = sio.loadmat(outfile_low+'.mat')['proj_data']
 except:
-    proj_data,proj_data_low= making_sino_from_bin(filenames,lag_corr,number_of_files, number_of_projections,ang_space, pixels,beam_profile_file,dark_current_file,new_size,det_low,pixels_to_crop,alignment_in_mm)
+    proj_data,proj_data_low= making_sino_from_bin(filenames,lag_corr,number_of_files, number_of_projections,ang_space, pixels,beam_profile_file,dark_current_file,new_size,det_low,pixels_to_crop,alignment_in_mm,a,b)
     #sio.savemat(outfile+'.mat', {'proj_data':proj_data})
     #sio.savemat(outfile_low+'.mat', {'proj_data':proj_data_low})
 print np.shape(proj_data[:,0,:])
